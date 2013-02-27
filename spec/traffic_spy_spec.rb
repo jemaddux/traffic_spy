@@ -1,4 +1,4 @@
-require 'traffic_spy'  # <-- your sinatra app
+require 'traffic_spy/application'
 require 'rspec'
 require 'rack/test'
 
@@ -8,7 +8,7 @@ describe 'The Trafic Spy App' do
   include Rack::Test::Methods
 
   def app
-    Sinatra::Application
+    TrafficSpy::Application
   end
 
   describe "POST /sources" do
@@ -26,6 +26,14 @@ describe 'The Trafic Spy App' do
         post "/sources", :identifier => "jumpstartlab"
         last_response.status.should eq 400
         last_response.body.should eq "{\"message\":\"no url provided\"}"
+      end
+    end
+
+    context "with rootURL but without identifier" do
+      it "returns 400 with an error meesage" do
+        post "/sources", :rootUrl => "http://jumpstartlab.com"
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"no identifier provided\"}"
       end
     end
   end
