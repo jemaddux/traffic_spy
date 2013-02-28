@@ -1,4 +1,6 @@
+require 'sequel'
 require 'sinatra/base'
+require 'traffic_spy/identifiers'
 
 module TrafficSpy
   class Application < Sinatra::Base
@@ -10,7 +12,14 @@ module TrafficSpy
         status 400
         "{\"message\":\"no identifier provided\"}"
       else
-        "{\"identifier\":\"#{params[:identifier]}\"}"
+        if Identifier.already_exist?(params[:identifier])
+          status 403        
+          "{\"message\":\"Duplicate identifier.\"}"
+        else
+          Identifier.add_to_database(params)
+          status 200
+          "{\"identifier\":\"#{params[:identifier]}\"}" 
+        end
       end
     end
   end
