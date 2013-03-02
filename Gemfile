@@ -11,6 +11,7 @@ group :development do
   gem 'guard-rspec'
   gem 'rack-test'
   gem 'rb-fsevent', '~> 0.9'
+  gem 'shotgun'
 end
 
 group :evaluations do
