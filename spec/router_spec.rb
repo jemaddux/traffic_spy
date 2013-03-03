@@ -1,5 +1,6 @@
 require 'rspec'
 require 'rack/test'
+#require 'test/unit'
 require './router'
 
 describe 'router.rb' do
@@ -140,8 +141,9 @@ describe 'router.rb' do
 
         get "sources/bing"
         last_response.status.should eq 200
-        last_response.body.should eq "html"
-        last_response.location.should include 'bing'
+        #last_response.message.should eq "hi there"
+        #last_response.body.should eq "html"
+        #last_response.body.include?("<TITLE>Stats Page for Kobe Bryant</TITLE>")
         ##have bunches of stuff
       end
     end
@@ -179,6 +181,55 @@ describe 'router.rb' do
         post "/sources", :identifier => "google", :rootUrl => "http://google.com"
         last_response.status.should eq 403
         last_response.body.should eq "{\"message\":\"Duplicate identifier.\"}"
+      end
+    end
+  end
+
+  describe "GET sources/IDENTITFIER/urls/RELATIVE/PATH" do
+    context 'if URL for IDENTITFIER exists' do
+      it "should return a page with response times" do
+        payload_bing1 = {
+          :url => "http://www.bing.com/searching_for_stuff",
+          :requestedAt => "2013-02-16 22:38:28 -0700",
+          :respondedIn => 90,
+          :referredBy => "http://www.bing.com",
+          :requestType => "GET",
+          :parameters => [],
+          :eventName => "socialLogin",
+          :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          :resolutionWidth => "1920",
+          :resolutionHeight => "1280",
+          :ip => "63.29.38.211" 
+        }
+
+        payload_bing2 = {
+          :url => "http://www.bing.com/searching_for_stuff",
+          :requestedAt => "2013-03-16 22:38:28 -0700",
+          :respondedIn => 37,
+          :referredBy => "http://www.bing.com",
+          :requestType => "GET",
+          :parameters => [],
+          :eventName => "frontPage",
+          :userAgent => "Opera/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          :resolutionWidth => "1920",
+          :resolutionHeight => "1080",
+          :ip => "63.39.38.213" 
+        }
+
+        post "/sources", :identifier => "bing", :rootUrl => 'http://www.bing.com'
+        post "/sources/bing/data", payload_bing1
+        post "/sources/bing/data", payload_bing2
+        get "sources/bing/urls/searching_for_stuff"
+        last_response.status.should eq 200
+        #last_response.body.should eq "html"
+      end
+    end
+
+    context "if URL for IDENTITFIER doesn't exist" do
+      it "should return a message that the url hasn't been requested" do
+        get "sources/bing/urls/not_searching_for_stuff"
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"No url for identifier.\"}"
       end
     end
   end

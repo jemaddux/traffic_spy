@@ -29,18 +29,29 @@ class Router < Sinatra::Base
     end
   end
 
-  get "/sources/*" do
+  get "/sources/:identifier" do
     TrafficSpy::FakeData.make_fake_data
-    if TrafficSpy::Identifier.not_exist?(params[:splat])
+    if TrafficSpy::Identifier.not_exist?(params[:identifier])
       redirect to("/error") 
     else
-      @urls = TrafficSpy::Payload.popular_urls_sorted(params[:splat])
-      @browsers = TrafficSpy::Payload.browsers(params[:splat])
-      @oses = TrafficSpy::Payload.oses(params[:splat])
-      @screen_resolutions = TrafficSpy::Payload.screen_resolution(params[:splat])
-      @average_response_times = TrafficSpy::Payload.response_times(params[:splat])
-      @events = TrafficSpy::Payload.events(params[:splat])
+      @urls = TrafficSpy::Payload.popular_urls_sorted(params[:identifier])
+      @browsers = TrafficSpy::Payload.browsers(params[:identifier])
+      @oses = TrafficSpy::Payload.oses(params[:identifier])
+      @screen_resolutions = TrafficSpy::Payload.screen_resolution(params[:identifier])
+      @average_response_times = TrafficSpy::Payload.response_times(params[:identifier])
+      @events = TrafficSpy::Payload.events(params[:identifier])
       erb :identifier_stats_page
+    end
+
+  end
+
+  get "/sources/*/urls/*" do
+    if TrafficSpy::Payload.url_exist?(params[:splat])
+      @sorted_response_times = TrafficSpy::Payload.sorted_url_response_times(params[:splat])
+      erb :url_statistics
+    else
+      status 400
+      "{\"message\":\"No url for identifier.\"}"
     end
   end
 

@@ -21,6 +21,7 @@ module TrafficSpy
     primary_key :id
     String :identifier_key
     String :url
+    String :relative_path
     String :requestedAt
     Integer :respondedIn
     String :referredBy

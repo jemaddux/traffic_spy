@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD><TITLE>URL Statistics</TITLE>
+</HEAD>
+<BODY>
+
+<h1>URL Statistics</h1>
+
+<h2>Longest response time to shortest response time.</h2>
+  <ul>
+    <% @sorted_response_times.each do |time| %>
+      <li><%= "#{time[:respondedIn]} milliseconds." %></li>
+    <% end %>
+  </ul>
+
+</BODY>
+</HTML>
+
+
+
+
+
+
+
+
+
+
+
