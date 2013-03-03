@@ -13,8 +13,8 @@ module TrafficSpy
       DB.from(:identifiers).where(:identifier => input).count == 0
     end
 
-    def self.testing
-      "Hobbits"
+    def self.find_id(input)
+      DB.from(:identifiers).where(:identifier => input).select(:id)
     end
 
   end

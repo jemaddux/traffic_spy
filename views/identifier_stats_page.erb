@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD><TITLE>Stats Page</TITLE>
+</HEAD>
+<BODY>
+
+<h1>Page full of stats</h1>
+
+<h2>Most requested URLS to least requested URLS</h2>
+  <ul>
+    <% @urls.each do |url| %>
+      <li><a href="google.com"><%= url[:url] %></a></li>
+    <% end %>
+  </ul>
+
+<h2>Web browser breakdown across all requests (userAgent)</h2>
+  <ul>
+    <% @browsers.each do |browser| %>
+      <li><%= browser[:userAgent].split[11] %></li>
+    <% end %>
+  </ul>
+
+<h2>OS breakdown across all requests (userAgent)</h2>
+  <ul>
+    <% @oses.each do |os| %>
+      <li><%= os[:userAgent].split[3..6].join(" ")[0..-2] %></li>
+    <% end %>
+  </ul>
+
+<h2>Screen Resolution across all requests (resolutionWidth x resolutionHeight)</h2>
+  <ul>
+    <% @screen_resolutions.each do |screen| %>
+      <li><%= "#{screen[:resolutionWidth]} by #{screen[:resolutionHeight]}" %></li>
+    <% end %>
+  </ul>
+
+<h2>Longest, average response time per URL to shortest, average response time per URL</h2>
+  <ul>
+    <% @average_response_times.each do |time| %>
+      <li><%= time[:respondedIn] %></li>
+    <% end %>
+  </ul>
+
+<h2>Hyperlink to view aggregate event data</h2>
+  <ul>
+    <% @events.each do |event| %>
+      <li><a href="google"><%= event[:eventName] %></a></li>
+    <% end %>
+  </ul>
+
+
+</BODY>
+</HTML>
+
+
+
+
+
+
+
+
+
+
+

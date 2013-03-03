@@ -1,23 +1,11 @@
 require "traffic_spy/version"
 require 'sequel'
-require 'traffic_spy/application'
+require 'traffic_spy/fake_data'
 require 'traffic_spy/identifiers'
 require 'sinatra/base'
      
 
-class Router < Sinatra::Base
-  get '/' do
-    "Hello World"
-  end
-end
-
 module TrafficSpy
-  class Router < Sinatra::Base
-    get '/' do
-      "Hello World"
-    end
-  end
-
 
   DB = Sequel.sqlite
 
@@ -31,6 +19,7 @@ module TrafficSpy
 
   DB.create_table :payload do
     primary_key :id
+    String :identifier_key
     String :url
     String :requestedAt
     Integer :respondedIn
