@@ -15,26 +15,31 @@ class Router < Sinatra::Base
 
   post "/sources/*/data" do
     #some array = params[:splat] ####is the * params as an array
-    if params[:referredBy].nil?
+    @identifier = params[:splat]
+    parsed_data = JSON.parse(params[:payload], symbolize_names: true)
+    parsed_data[:splat] = @identifier
+    # raise parsed_data.inspect
+    if parsed_data[:referredBy].nil?
       status 400
       "{\"message\":\"Bad Request\"}"
     else
-      if TrafficSpy::Payload.already_exist?(params)
+      if TrafficSpy::Payload.already_exist?(parsed_data)
         status 403
         "{\"message\":\"Forbidden\"}"
       else
-        TrafficSpy::Payload.add_to_database(params)
+        TrafficSpy::Payload.add_to_database(parsed_data)
         status 200
       end
     end
   end
 
   get "/sources/:identifier" do
-    TrafficSpy::FakeData.make_fake_data
+    #TrafficSpy::FakeData.make_fake_data
     if TrafficSpy::Identifier.not_exist?(params[:identifier])
       redirect to("/error") 
     else
-      @urls = TrafficSpy::Payload.popular_urls_sorted(params[:identifier])
+      @urls = TrafficSpy::Payload.popular_urls_sorted(params[:identifier]).to_a
+      # raise @urls.inspect
       @browsers = TrafficSpy::Payload.browsers(params[:identifier])
       @oses = TrafficSpy::Payload.oses(params[:identifier])
       @screen_resolutions = TrafficSpy::Payload.screen_resolution(params[:identifier])

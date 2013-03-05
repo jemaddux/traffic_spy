@@ -1,3 +1,5 @@
-require 'router'
+Bundler.require
+require './lib/traffic_spy'
 
-run Router.new
+app = TrafficSpy::Server
+run app
