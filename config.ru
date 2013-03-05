@@ -1,5 +1,5 @@
 Bundler.require
 require './lib/traffic_spy'
 
-app = TrafficSpy::Server
+app = TrafficSpy::Router
 run app

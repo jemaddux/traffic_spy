@@ -1,5 +1,3 @@
-require "traffic_spy/identifiers"
-
 module TrafficSpy
   class Payload
 

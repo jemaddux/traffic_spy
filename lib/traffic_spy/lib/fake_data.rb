@@ -1,8 +1,3 @@
-require 'sequel'
-require 'sinatra/base'
-require 'traffic_spy/identifiers'
-require 'traffic_spy/payload'
-
 module TrafficSpy
   class FakeData
       

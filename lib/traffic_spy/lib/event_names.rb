@@ -1,5 +1,3 @@
-require "traffic_spy"
-
 module TrafficSpy
   class EventNames
     def self.add_to_database(params)

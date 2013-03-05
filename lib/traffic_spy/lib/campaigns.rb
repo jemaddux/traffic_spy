@@ -1,5 +1,3 @@
-require "traffic_spy/event_names"
-
 module TrafficSpy
   class Campaigns
     def self.add_to_database(params)
