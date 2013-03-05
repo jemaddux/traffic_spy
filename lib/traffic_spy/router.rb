@@ -1,5 +1,7 @@
 module TrafficSpy
   class Router < Sinatra::Base
+    set :views, "lib/traffic_spy/views"
+
     def self.hello_world
       "Hello World! works?"
     end
@@ -89,10 +91,9 @@ module TrafficSpy
     end
 
     get "/sources/:identifier/campaigns" do
-      a =  Campaigns.database.where(identifier: params[:identifier]).to_a
-      raise a.inspect
-      a = Campaigns.does_exist?(params[:identifier])
-      raise a.inspect
+      # Campaigns.database.where(identifier: params[:identifier]).to_a
+
+      # a = Campaigns.does_exist?(params[:identifier])
       if Campaigns.does_exist?(params[:identifier])
         status 200
         erb :campaign_index
