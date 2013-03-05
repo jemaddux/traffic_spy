@@ -1,3 +1,5 @@
+require 'sinatra'
+
 module TrafficSpy
   class Router < Sinatra::Base
     set :views, "lib/traffic_spy/views"
@@ -57,9 +59,9 @@ module TrafficSpy
       end
     end
 
-    get "/sources/*/events" do
-     if Payload.event_exist?(params[:splat])
-        @events = Payload.sorted_grouped_events(params[:splat])
+    get "/sources/:identifier/events" do
+     if Payload.event_exist?(params[:identifier])
+        @events = Payload.sorted_grouped_events(params[:identifier])
         erb :events
       else
         status 400
@@ -96,12 +98,32 @@ module TrafficSpy
       # a = Campaigns.does_exist?(params[:identifier])
       if Campaigns.does_exist?(params[:identifier])
         status 200
+        @campaigns = Campaigns.list(params[:identifier])
         erb :campaign_index
-        #return page of links
       else
         status 200
        "{\"message\":\"No campaigns for identifier\"}"
       end
+    end
+
+    get "/sources/:identifier/campaigns/:campaignName" do
+      if Campaigns.campaignName_exist?(params)
+        @eventNames = EventNames.list(params)
+        @payloads = []
+        @eventNames.each do |eventName|
+          @payloads += Payload.get_events(params[:identifier],eventName[:eventName]).to_a
+        end
+        @params = params
+        erb :campaignName
+      else
+        "No campaign named #{params[:campaignName]} for #{params[:identifier]}. <a href='http://localhost:9393/sources/#{params[:identifier]}/campaigns'>#{params[:identifier]}</a>"
+      end
+    end
+
+    get "/sources/:identifier/campaigns/:campaignName/:eventName" do
+      @payloads = Payload.get_events(params[:identifier],params[:eventName])
+      @params = params
+      erb :specific_event
     end
 
     get '/error' do

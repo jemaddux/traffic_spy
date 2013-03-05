@@ -25,6 +25,10 @@ module TrafficSpy
                       :updated_at => Time.now)
     end
 
+    def self.get_events(identifier_key,eventName)
+      database.where(:eventName => eventName, :identifier_key => identifier_key)
+    end
+
     def self.convert_url_to_relative_path(identifier_key,url)
       url.gsub("http://www.","").gsub("http://","").gsub(".com","").gsub(".net","").gsub(".it","").gsub(identifier_key,"")
     end
@@ -79,8 +83,7 @@ module TrafficSpy
     end
 
     def self.sorted_grouped_events(identifier)
-      dataset = database.where(:identifier_key => identifier)
-      temp_data = dataset.group_by(:eventName)
+      temp_data = database.where(:identifier_key => identifier)
       events = []
       temp_hash = Hash.new
       temp_data.each do |data|

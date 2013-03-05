@@ -1,8 +1,13 @@
 <html>
+<head><title>Campaigns</title>
 
+</head>
 <body>
 
-  <p>some stuff here</p>
+  <h1>Campaigns</h1>
+  <% @campaigns.each do |campaign| %>
+    <a href="google.com"><%= campaign[:campaignName] %></a><br>
+  <% end %>
 
 </body>
 

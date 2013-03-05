@@ -1,0 +1,14 @@
+<html>
+<head><title><%= @params[:eventName] %></title>
+</head>
+<body> <h1><%= @params[:eventName] %></h1>
+
+<ul>
+<% @payloads.each do |payload| %>
+  <li><%= payload.to_s %></li>
+<% end %>
+</ul>
+</body>
+
+
+</html>

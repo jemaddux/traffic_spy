@@ -1,0 +1,18 @@
+<html>
+<head><title><%= @params[:campaignName] %></title>
+</head>
+<body> <h1><%= @params[:campaignName] %></h1>
+<% @eventNames.each do |events| %>
+<%= events.to_s %><br/>
+<% end %>
+
+<br><br>
+
+<% @payloads.each do |payload| %>
+  <%= payload.to_s %><br>
+<% end %>
+
+</body>
+
+
+</html>
