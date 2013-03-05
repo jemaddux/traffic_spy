@@ -55,6 +55,54 @@ class Router < Sinatra::Base
     end
   end
 
+  get "/sources/*/events" do
+   if TrafficSpy::Payload.event_exist?(params[:splat])
+      @events = TrafficSpy::Payload.sorted_grouped_events(params[:splat])
+      erb :events
+    else
+      status 400
+      "{\"message\":\"No events for identifier\"}"
+    end
+  end
+
+  get "/sources/*/events/*" do
+    if TrafficSpy::Payload.specific_event_exist?(params[:splat][0],params[:splat][1])
+      @events = TrafficSpy::Payload.specific_events(params[:splat][0],params[:splat][1])
+      erb :event_stats
+    else
+      erb :event_redirect
+    end
+  end
+
+  post "/sources/:identifier/campaigns" do
+    if params[:eventNames].nil? || params[:campaignName].nil?
+      status 400
+      "{\"message\":\"Bad request.\"}"
+    elsif TrafficSpy::Campaigns.exist?(params)
+      status 403
+      "{\"message\":\"Forbidden.\"}"
+    else
+      TrafficSpy::Campaigns.add_to_database(params)
+      status 200
+      params.inspect
+    end
+  end
+
+  get "/sources/:identifier/campaigns" do
+    a =  TrafficSpy::DB[:campaigns].where(identifier: params[:identifier]).to_a
+    raise a.inspect
+    a = TrafficSpy::Campaigns.does_exist?(params[:identifier])
+    raise a.inspect
+    if TrafficSpy::Campaigns.does_exist?(params[:identifier])
+      status 200
+      erb :campaign_index
+      #return page of links
+    else
+      status 200
+     "{\"message\":\"No campaigns for identifier\"}"
+    end
+  end
+
   get '/error' do
     erb :identifier_error
   end

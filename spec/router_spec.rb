@@ -185,7 +185,7 @@ describe 'router.rb' do
     end
   end
 
-  describe "GET sources/IDENTITFIER/urls/RELATIVE/PATH" do
+  describe "GET sources/IDENTIFIER/urls/RELATIVE/PATH" do
     context 'if URL for IDENTITFIER exists' do
       it "should return a page with response times" do
         payload_bing1 = {
@@ -233,4 +233,108 @@ describe 'router.rb' do
       end
     end
   end
+
+  describe "GETS sources/IDENTIFIER/events" do
+    context "if event already exists" do
+      it "returns a page with event details" do
+        get "sources/zappos/events"
+        last_response.status.should eq 200
+      end
+    end
+
+    context "if event doesnt exist" do
+      it "returns an error message" do
+        post "/sources", :identifier => "toyota", :rootUrl => 'http://www.toyota.com'
+        get "sources/toyota/events"
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"No events for identifier\"}"
+      end
+    end
+  end
+
+  describe "GETS sources/IDENTIFIER/events/EVENTNAME" do
+    context "if event already exists" do
+      it "returns a page of event specific data" do
+        get "sources/zappos/events/searchFind"
+        last_response.status.should eq 200
+      end
+    end
+
+    context "if event doesnt exist" do
+      it "returns a page with redirect event index & error message" do
+        post "/sources", :identifier => "toyota", :rootUrl => 'http://www.toyota.com'
+        get "sources/toyota/events/toyotathon"
+        last_response.status.should eq 200
+      end
+    end    
+  end
+
+  describe "POST sources/IDENTIFIER/campaigns" do
+    context "if campaign name already exists" do
+      it "should return a 403 Forbidden error message" do
+        post "/sources", :identifier => "blizzard", :rootUrl => 'http://blizard.com'
+        post "/sources/blizzard/campaigns", :campaignName => "diablo", :eventNames => ["internet_portal", "gaming"]
+        post "/sources/blizzard/campaigns", :campaignName => "diablo", :eventNames => ["internet_portal", "gaming"]
+        last_response.status.should eq 403
+        last_response.body.should eq "{\"message\":\"Forbidden.\"}"
+      end
+    end
+
+    context "if missing any parameters" do
+      it "should return a 400 Bad Request when missing events" do
+        post "/sources", :identifier => "junkfood", :rootUrl => 'http://junkfood.com'
+        post "/sources/junkfood/campaigns", :campaignName => "cheese-its"
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"Bad request.\"}"
+      end
+
+      it "should return a 400 Bad Request when missing campaignName" do
+        post "/sources", :identifier => "goodfood", :rootUrl => 'http://goodfood.com'
+        post "/sources/goodfood/campaigns", :eventNames => ["apples","strawberries"]
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"Bad request.\"}"
+      end
+    end
+
+    context "if POST request is good" do
+      it "should return a status 200" do
+        post "/sources", :identifier => "pixar", :rootUrl => 'http://pixar.com'
+        post "/sources/pixar/campaigns", :campaignName => "wall-e", :eventNames => ["recycle", "eve"]
+        last_response.status.should eq 200
+      end
+    end
+  end
+
+  describe "GET sources/IDENTIFIER/campaigns" do
+    context "campaign exists" do
+      it "retuns hyperlink index for campaigns" do
+        post "/sources", :identifier => "maxis", :rootUrl => 'http://maxis.com'
+        post "/sources/maxis/campaigns", :campaignName => "simcity", :eventName => ["simcity1","simcity2","simcity3"]
+        get "/sources/maxis/campaigns"
+        last_response.status.should eq 200
+        last_response.body.should eq "html"
+      end
+    end
+
+    context "no campaign exists" do
+      it "returns a message that no campaigns have been defined" do 
+        post "/sources", :identifier => "easports", :rootUrl => 'http://www.easports.com'
+        get "/sources/easports/campaigns"
+        last_response.status.should eq 200
+        last_response.body.should eq "{\"message\":\"No campaigns for identifier\"}"
+      end
+    end
+  end
 end
+
+
+
+
+
+
+
+
+
+
+
+

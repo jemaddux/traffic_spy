@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<html>
+<head><title>Stats page for an event</title>
+</head>
+<body>
+  <h1>Stats page for an event</h1>
+    <% @events.each do |event| %>
+      <%= "#{event[:hour]} o'clock had #{event[:count]} hits." %>
+    <% end %>
+</body>
+</html>

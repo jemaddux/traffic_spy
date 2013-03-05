@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<html>
+<head><title>Events Page</title>
+</head>
+<body>
+  <h1>Events Page</h1>
+  <% @events.each do |event| %>
+  <%= "#{event[:eventName]} #{event[:count]}" %>
+  <%end%>
+</body>
+</html>

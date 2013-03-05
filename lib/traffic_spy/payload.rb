@@ -8,6 +8,7 @@ module TrafficSpy
        dataset.insert(:url => params[:url],
                       :requestedAt => params[:requestedAt],
                       :relative_path => convert_url_to_relative_path(params[:splat][0],params[:url]),
+                      :hour => params[:requestedAt][11..12],
                       :identifier_key => params[:splat][0],
                       :respondedIn => params[:respondedIn],
                       :referredBy => params[:referredBy],
@@ -61,6 +62,50 @@ module TrafficSpy
 
     def self.sorted_url_response_times(params)
       DB.from(:payload).where(:identifier_key => params[0], :relative_path => "/#{params[1]}").select(:respondedIn)
+    end
+
+    def self.event_exist?(identifier)
+      DB.from(:payload).where(:identifier_key => identifier).count > 0 
+    end
+
+    def self.how_many_events?(identifier,eventName)
+     DB.from(:payload).where(:identifier_key => identifier, :eventName => eventName).count
+    end
+
+    def self.specific_event_exist?(identifier, eventName)
+      how_many_events?(identifier, eventName) > 0
+    end
+
+    def self.sorted_grouped_events(identifier)
+      dataset = DB.from(:payload).where(:identifier_key => identifier)
+      temp_data = dataset.group_by(:eventName)
+      events = []
+      temp_hash = Hash.new
+      temp_data.each do |data|
+        temp_hash = {}
+        temp_hash[:eventName] = data[:eventName]
+        temp_hash[:count] = how_many_events?(identifier, data[:eventName])
+        events << temp_hash
+      end
+      events
+    end
+
+    def self.specific_events(identifier, eventName)
+      dataset = DB.from(:payload).where(:eventName => eventName, :identifier_key => identifier)
+      temp_data = dataset.group_by(:hour)
+      hours = []
+      temp_hash = Hash.new
+      temp_data.each do |requestedAt|
+        temp_hash = {}
+        temp_hash[:hour] = requestedAt[:hour]
+        temp_hash[:count] = how_many_hours?(identifier, eventName, requestedAt[:hour])
+        hours << temp_hash
+      end
+      hours
+    end
+
+    def self.how_many_hours?(identifier, eventName, hour)
+      DB.from(:payload).where(:identifier_key => identifier, :eventName => eventName, :hour => hour).count
     end
   end
 end
