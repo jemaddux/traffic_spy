@@ -5,6 +5,10 @@ module TrafficSpy
       @database ||= DatabaseConnection.get_connection[:payload]
     end
 
+    def self.destroy
+
+    end
+
     def self.add_to_database(params)
        #identifier_key = Identifier.find_id()
        database.insert(:url => params[:url],
@@ -24,6 +28,8 @@ module TrafficSpy
                       :created_at => Time.now,
                       :updated_at => Time.now)
     end
+
+
 
     def self.get_events(identifier_key,eventName)
       database.where(:eventName => eventName, :identifier_key => identifier_key)

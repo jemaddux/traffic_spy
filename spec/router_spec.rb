@@ -1,6 +1,9 @@
 require 'rspec'
 require 'rack/test'
 require './lib/traffic_spy/router'
+require './lib/traffic_spy'
+require './lib/traffic_spy/lib/database_connection'
+require './lib/traffic_spy/lib/payload'
 
 describe 'router.rb' do
   include Rack::Test::Methods
@@ -8,6 +11,19 @@ describe 'router.rb' do
   def app
     TrafficSpy::Router
   end
+
+  before(:each) do
+    TrafficSpy::DatabaseConnection.delete_all
+  end
+  
+  # RSpec.configure do |config|
+  #   config.around(:each) do
+  #     TrafficSpy::DatabaseConnection.database.transaction do
+  #       example.run
+  #       raise Sequel::Rollback
+  #     end
+  #   end
+  # end
 
   describe "router class" do
     context "self.hello_world" do
@@ -22,125 +38,124 @@ describe 'router.rb' do
       end
     end
 
-    # let(:payload) do
-    #   #payload = {
-    #     #   :url => "http://jumpstartlab.com/blog",
-    #     #   :requestedAt => "2013-02-16 21:38:28 -0700",
-    #     #   :respondedIn => 37,
-    #     #   :referredBy => "http://jumpstartlab.com",
-    #     #   :requestType => "GET",
-    #     #   :parameters => [],
-    #     #   :eventName => "socialLogin",
-    #     #   :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-    #     #   :resolutionWidth => "1920",
-    #     #   :resolutionHeight => "1280",
-    #     #   :ip => "63.29.38.211" 
-    #     # }
-    # end
+    let(:payload) do
+      payload = %Q{
+        {"url":"http://jumpstartlab.com/blog",
+          "requestedAt":"2013-02-16 21:38:28 -0700",
+          "respondedIn":37,
+          "referredBy":"http://jumpstartlab.com",
+          "requestType":"GET",
+          "parameters":[],
+          "eventName": "socialLogin",
+          "userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          "resolutionWidth":"1920",
+          "resolutionHeight":"1280",
+          "ip":"63.29.38.211"}
+      }
+      payload.gsub("\n", "").gsub(/\s\s+/, "")
+    end
 
 
 
-    # let(:payload_amazon) do
-    #   payload = {
-    #       :url => "http://www.amazon.com/blog",
-    #       :requestedAt => "2013-02-16 21:38:28 -0700",
-    #       :respondedIn => 37,
-    #       :referredBy => "http://www.amazon.com",
-    #       :requestType => "GET",
-    #       :parameters => [],
-    #       :eventName => "socialLogin",
-    #       :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-    #       :resolutionWidth => "1920",
-    #       :resolutionHeight => "1280",
-    #       :ip => "63.29.38.211" 
-    #     }
+    let(:payload_amazon) do
+      payload = {
+          :url => "http://www.amazon.com/blog",
+          :requestedAt => "2013-02-16 21:38:28 -0700",
+          :respondedIn => 37,
+          :referredBy => "http://www.amazon.com",
+          :requestType => "GET",
+          :parameters => [],
+          :eventName => "socialLogin",
+          :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          :resolutionWidth => "1920",
+          :resolutionHeight => "1280",
+          :ip => "63.29.38.211" 
+        }
 
-    # end
+    end
 
     context "respond to a payload" do
-      # it "returns 200 OK" do
-      #   payload = 'payload={"url":"http://jumpstartlab.com/blog","requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"referredBy":"http://jumpstartlab.com","requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
-      #    post "/sources/jumpstartlab/data", payload
-      #    #Router.sources_identifier_data(payload)
-      #    last_response.status.should eq 200
-      # end
+      it "returns 200 OK" do
+        url = "http://jumpstartlab.com"
+        TrafficSpy::Identifier.
+          add_to_database(identifier: 'jumpstartlab', rootUrl: url)
+        post "/sources/jumpstartlab/data", {payload: payload}
+        last_response.status.should eq 200
+      end
     
-      # it "returns 200 OK" do
-      #   payload_google = 'payload={"url":"http://jumpstartlab.com/blog","requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"referredBy":"http://jumpstartlab.com","requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
-      #   post "/sources/google/data", payload_google
-      #   last_response.status.should eq 200
-      # end
+      it "returns 200 OK" do
+        payload_google = 'payload={"url":"http://jumpstartlab.com/blog","requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"referredBy":"http://jumpstartlab.com","requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
+        post "/sources/google/data", payload_google
+        last_response.status.should eq 200
+      end
 
-      # it "returns 400 Bad Request" do
-      #   payload_bad = 'payload={"requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
-      #   post "/sources/google/data", payload_bad
-      #   last_response.status.should eq 400
-      #   last_response.body.should eq "{\"message\":\"Bad Request\"}"
-      # end
+      it "returns 400 Bad Request" do
+        payload_bad = 'payload={"requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
+        post "/sources/google/data", payload_bad
+        last_response.status.should eq 400
+        last_response.body.should eq "{\"message\":\"Bad Request\"}"
+      end
 
-      # it "returns 403 Forbidden" do
-      #   payload = 'payload={"url":"http://jumpstartlab2.com/blog","requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"referredBy":"http://jumpstartlab.com","requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
-      #   post "/sources/amazon/data", payload
-      #   post "/sources/amazon/data", payload
-      #   last_response.status.should eq 403
-      #   last_response.body.should eq "{\"message\":\"Forbidden\"}"
-      # end        
+      it "returns 403 Forbidden" do
+        payload = 'payload={"url":"http://jumpstartlab2.com/blog","requestedAt":"2013-02-16 21:38:28 -0700","respondedIn":37,"referredBy":"http://jumpstartlab.com","requestType":"GET","parameters":[],"eventName": "socialLogin","userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17","resolutionWidth":"1920","resolutionHeight":"1280","ip":"63.29.38.211"}'
+        post "/sources/amazon/data", payload
+        post "/sources/amazon/data", payload
+        last_response.status.should eq 403
+        last_response.body.should eq "{\"message\":\"Forbidden\"}"
+      end        
     end
 
     context "responding to sources/IDENTITFIER" do
-      # it "with a bad IDENTITFIER we get redirected to another page" do
-      #   get "/sources/apple"
-      #   follow_redirect!
-      #   last_response.status.should eq 200
-      # end
+      it "with a bad IDENTITFIER we get redirected to another page" do
+        get "/sources/apple"
+        follow_redirect!
+        last_response.status.should eq 200
+      end
 
-      # it "does exists we get a page" do
-      #   payload_bing1 = {
-      #     :url => "http://www.bing.com/blog",
-      #     :requestedAt => "2013-02-16 22:38:28 -0700",
-      #     :respondedIn => 37,
-      #     :referredBy => "http://www.bing.com",
-      #     :requestType => "GET",
-      #     :parameters => [],
-      #     :eventName => "socialLogin",
-      #     :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-      #     :resolutionWidth => "1920",
-      #     :resolutionHeight => "1280",
-      #     :ip => "63.29.38.211" 
-      #   }
+      it "does exists we get a page" do
+        payload_bing1 = {
+          :url => "http://www.bing.com/blog",
+          :requestedAt => "2013-02-16 22:38:28 -0700",
+          :respondedIn => 37,
+          :referredBy => "http://www.bing.com",
+          :requestType => "GET",
+          :parameters => [],
+          :eventName => "socialLogin",
+          :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          :resolutionWidth => "1920",
+          :resolutionHeight => "1280",
+          :ip => "63.29.38.211" 
+        }
 
-      #   payload_bing2 = {
-      #     :url => "http://www.bing.com",
-      #     :requestedAt => "2013-03-16 22:38:28 -0700",
-      #     :respondedIn => 37,
-      #     :referredBy => "http://www.bing.com",
-      #     :requestType => "GET",
-      #     :parameters => [],
-      #     :eventName => "frontPage",
-      #     :userAgent => "Opera/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-      #     :resolutionWidth => "1920",
-      #     :resolutionHeight => "1080",
-      #     :ip => "63.39.38.213" 
-      #   }
+        payload_bing2 = {
+          :url => "http://www.bing.com",
+          :requestedAt => "2013-03-16 22:38:28 -0700",
+          :respondedIn => 37,
+          :referredBy => "http://www.bing.com",
+          :requestType => "GET",
+          :parameters => [],
+          :eventName => "frontPage",
+          :userAgent => "Opera/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          :resolutionWidth => "1920",
+          :resolutionHeight => "1080",
+          :ip => "63.39.38.213" 
+        }
 
-      #   post "/sources", :identifier => "bing", :rootUrl => 'http://www.bing.com'
-      #   post "/sources/bing/data", payload_bing1
-      #   post "/sources/bing/data", payload_bing2
+        post "/sources", :identifier => "bing", :rootUrl => 'http://www.bing.com'
+        post "/sources/bing/data", payload_bing1
+        post "/sources/bing/data", payload_bing2
 
-      #   get "sources/bing"
-      #   last_response.status.should eq 200
-      #   #last_response.message.should eq "hi there"
-      #   #last_response.body.should eq "html"
-      #   #last_response.body.include?("<TITLE>Stats Page for Kobe Bryant</TITLE>")
-      #   ##have bunches of stuff
-      # end
+        get "sources/bing"
+        last_response.status.should eq 200
+      end
     end
   end
 
   describe "POST /sources" do
     context "with both identifier and rootUrl" do
       it "returns a 200(OK) with a body" do
-        post "/sources", ":identifier => 'jumpstartlab2', :rootUrl => 'http://jumpstartlab2.com'"
+        pending
+        post "/sources", :identifier => 'jumpstartlab2', :rootUrl => 'http://jumpstartlab2.com'
         last_response.should eq 200
         #last_response.body.should eq "{\"identifier\":\"jumpstartlab\"}"
       end
@@ -175,6 +190,8 @@ describe 'router.rb' do
   describe "GET sources/IDENTIFIER/urls/RELATIVE/PATH" do
     context 'if URL for IDENTITFIER exists' do
       it "should return a page with response times" do
+        pending
+
         payload_bing1 = {
           :url => "http://www.bing.com/searching_for_stuff",
           :requestedAt => "2013-02-16 22:38:28 -0700",
@@ -224,6 +241,7 @@ describe 'router.rb' do
   describe "GETS sources/IDENTIFIER/events" do
     context "if event already exists" do
       it "returns a page with event details" do
+        pending
         get "sources/zappos/events"
         last_response.status.should eq 200
       end
@@ -285,6 +303,7 @@ describe 'router.rb' do
 
     context "if POST request is good" do
       it "should return a status 200" do
+        pending
         post "/sources", :identifier => "pixar", :rootUrl => 'http://pixar.com'
         post "/sources/pixar/campaigns", :campaignName => "wall-e", :eventNames => ["recycle", "eve"]
         last_response.status.should eq 200
@@ -292,26 +311,8 @@ describe 'router.rb' do
     end
   end
 
-  describe "GET sources/IDENTIFIER/campaigns" do
-    # context "campaign exists" do
-    #   it "retuns hyperlink index for campaigns" do
-    #     post "/sources", :identifier => "maxis", :rootUrl => 'http://maxis.com'
-    #     post "/sources/maxis/campaigns", :campaignName => "simcity", :eventName => ["simcity1","simcity2","simcity3"]
-    #     get "/sources/maxis/campaigns"
-    #     last_response.status.should eq 200
-    #     last_response.body.should eq "html"
-    #   end
-    end
 
-    context "no campaign exists" do
-      # it "returns a message that no campaigns have been defined" do 
-      #   post "/sources", :identifier => "easports", :rootUrl => 'http://www.easports.com'
-      #   get "/sources/easports/campaigns"
-      #   last_response.status.should eq 200
-      #   last_response.body.should eq "{\"message\":\"No campaigns for identifier\"}"
-      # end
-    end
-  end
+
 end
 
 

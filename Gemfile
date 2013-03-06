@@ -12,6 +12,7 @@ gemspec
 
 group :development do
   gem 'rspec'
+  gem 'simplecov', :require => false, :group => :test
   gem 'guard-rspec'
   gem 'sinatra-base'
   gem 'test-unit'
