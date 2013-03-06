@@ -1,11 +1,4 @@
-require 'rspec'
-require 'rack/test'
-require './lib/traffic_spy/router'
-require './lib/traffic_spy'
-require './lib/traffic_spy/lib/database_connection'
-require './lib/traffic_spy/lib/payload'
-require 'simplecov'
-SimpleCov.start
+require 'spec_helper'
 
 describe 'router.rb' do
   include Rack::Test::Methods

@@ -1,8 +1,4 @@
 require 'sinatra/base'
-require 'sequel'
-require 'pg'
-require 'json'
-
 require 'traffic_spy/version'
 require 'traffic_spy/lib/database_connection'
 require 'traffic_spy/lib/payload'

@@ -1,6 +1,7 @@
 require "bundler/gem_tasks"
 
 require 'sequel'
+require 'traffic_spy/lib/database_connection'
 
 namespace :db do
   desc "Run migrations"
@@ -19,6 +20,14 @@ namespace :db do
     database_path = 'traffic_spy'
     puts "Using database: #{database_path}"
     @database = Sequel.postgres database_path
+  end
+
+  desc "Setup the test database"
+  task :test_prepare do
+    TrafficSpy::DatabaseConnection.destroy_database(:test)
+    Sequel.extension :migration
+    db = TrafficSpy::DatabaseConnection.database_for(:test)
+    Sequel::Migrator.run(db, "db/migrations")
   end
 end
 
