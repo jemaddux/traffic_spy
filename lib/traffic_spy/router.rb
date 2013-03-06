@@ -4,20 +4,32 @@ module TrafficSpy
   class Router < Sinatra::Base
     set :views, "lib/traffic_spy/views"
 
-    def self.hello_world
-      "Hello World! works?"
-    end
-
     get '/' do 
-      "hello_wosdfasdfrld"
+      "Hello World"
     end
 
-    post "/sources/*/data" do
-      #some array = params[:splat] ####is the * params as an array
-      @identifier = params[:splat]
+    post '/sources' do
+      if params[:rootUrl].nil?
+        status 400
+        "{\"message\":\"no url provided\"}"
+      elsif params[:identifier].nil?
+        status 400
+        "{\"message\":\"no identifier provided\"}"
+      else
+        if Identifier.already_exist?(params[:identifier])
+          status 403        
+          "{\"message\":\"Duplicate identifier.\"}"
+        else
+          Identifier.add_to_database(params)
+          status 200
+          "{\"identifier\":\"#{params[:identifier]}\"}" 
+        end
+      end
+    end
+
+    post "/sources/:identifier/data" do
       parsed_data = JSON.parse(params[:payload], symbolize_names: true)
-      parsed_data[:splat] = @identifier
-      # raise parsed_data.inspect
+      parsed_data[:identifier] = params[:identifier]
       if parsed_data[:referredBy].nil?
         status 400
         "{\"message\":\"Bad Request\"}"
@@ -33,25 +45,24 @@ module TrafficSpy
     end
 
     get "/sources/:identifier" do
-      #FakeData.make_fake_data
       if Identifier.not_exist?(params[:identifier])
         redirect to("/error") 
       else
         @urls = Payload.popular_urls_sorted(params[:identifier]).to_a
-        # raise @urls.inspect
         @browsers = Payload.browsers(params[:identifier])
         @oses = Payload.oses(params[:identifier])
         @screen_resolutions = Payload.screen_resolution(params[:identifier])
         @average_response_times = Payload.response_times(params[:identifier])
         @events = Payload.events(params[:identifier])
+        @params = params
         erb :identifier_stats_page
       end
 
     end
 
-    get "/sources/*/urls/*" do
-      if Payload.url_exist?(params[:splat])
-        @sorted_response_times = Payload.sorted_url_response_times(params[:splat])
+    get "/sources/:identifier/urls/:path" do
+      if Payload.url_exist(params[:identifier],params[:path])
+        @urls = Payload.urls(params[:identifier],params[:path])
         erb :url_statistics
       else
         status 400
@@ -69,9 +80,9 @@ module TrafficSpy
       end
     end
 
-    get "/sources/*/events/*" do
-      if Payload.specific_event_exist?(params[:splat][0],params[:splat][1])
-        @events = Payload.specific_events(params[:splat][0],params[:splat][1])
+    get "/sources/:identifier/events/:eventName" do
+      if Payload.specific_event_exist?(params[:identifier],params[:eventName])
+        @events = Payload.specific_events(params[:identifier],params[:eventName])
         erb :event_stats
       else
         erb :event_redirect
@@ -93,9 +104,6 @@ module TrafficSpy
     end
 
     get "/sources/:identifier/campaigns" do
-      # Campaigns.database.where(identifier: params[:identifier]).to_a
-
-      # a = Campaigns.does_exist?(params[:identifier])
       if Campaigns.does_exist?(params[:identifier])
         status 200
         @campaigns = Campaigns.list(params[:identifier])
@@ -130,23 +138,6 @@ module TrafficSpy
       erb :identifier_error
     end
 
-    post '/sources' do
-      if params[:rootUrl].nil?
-        status 400
-        "{\"message\":\"no url provided\"}"
-      elsif params[:identifier].nil?
-        status 400
-        "{\"message\":\"no identifier provided\"}"
-      else
-        if Identifier.already_exist?(params[:identifier])
-          status 403        
-          "{\"message\":\"Duplicate identifier.\"}"
-        else
-          Identifier.add_to_database(params)
-          status 200
-          "{\"identifier\":\"#{params[:identifier]}\"}" 
-        end
-      end
-    end
+    
   end
 end

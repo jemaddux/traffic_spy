@@ -10,22 +10,9 @@ describe 'router.rb' do
   before(:each) do
     TrafficSpy::DatabaseConnection.delete_all
   end
-  
-  # RSpec.configure do |config|
-  #   config.around(:each) do
-  #     TrafficSpy::DatabaseConnection.database.transaction do
-  #       example.run
-  #       raise Sequel::Rollback
-  #     end
-  #   end
-  # end
 
   describe "router class" do
     context "self.hello_world" do
-      it "returns 'Hello Word!'" do
-        response = TrafficSpy::Router.hello_world
-        response.should eq "Hello World! works?"
-      end
 
       it "responds to get '/' " do
         get '/'
@@ -149,10 +136,9 @@ describe 'router.rb' do
   describe "POST /sources" do
     context "with both identifier and rootUrl" do
       it "returns a 200(OK) with a body" do
-        pending
         post "/sources", :identifier => 'jumpstartlab2', :rootUrl => 'http://jumpstartlab2.com'
-        last_response.should eq 200
-        #last_response.body.should eq "{\"identifier\":\"jumpstartlab\"}"
+        last_response.status.should eq 200
+        last_response.body.should eq "{\"identifier\":\"jumpstartlab2\"}"
       end
     end
 
@@ -183,26 +169,29 @@ describe 'router.rb' do
   end
 
   describe "GET sources/IDENTIFIER/urls/RELATIVE/PATH" do
+    let(:payload) do
+      payload = %Q{
+        {"url":"http://jumpstartlab.com/blog",
+          "requestedAt":"2013-02-16 21:38:28 -0700",
+          "respondedIn":37,
+          "referredBy":"http://jumpstartlab.com",
+          "requestType":"GET",
+          "parameters":[],
+          "eventName": "socialLogin",
+          "userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          "resolutionWidth":"1920",
+          "resolutionHeight":"1280",
+          "ip":"63.29.38.211"}
+      }
+      payload.gsub("\n", "").gsub(/\s\s+/, "")
+    end
+
     context 'if URL for IDENTITFIER exists' do
       it "should return a page with response times" do
         pending
-        payload = {
-          :url => "http://www.bing.com/searching_for_stuff",
-          :requestedAt => "2013-02-16 22:38:28 -0700",
-          :respondedIn => 90,
-          :referredBy => "http://www.bing.com",
-          :requestType => "GET",
-          :parameters => [],
-          :eventName => "socialLogin",
-          :userAgent => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-          :resolutionWidth => "1920",
-          :resolutionHeight => "1280",
-          :ip => "63.29.38.211" 
-        }
-
-        post "/sources", :identifier => "bing", :rootUrl => 'http://www.bing.com'
-        post "/sources/bing/data", payload
-        get "sources/bing/urls/searching_for_stuff"
+        post "/sources", :identifier => "jumpstartlab", :rootUrl => 'http://jumpstartlab.com'
+        post "/sources/jumpstartlab/data", payload
+        get "sources/jumpstartlab/urls/blog"
         last_response.status.should eq 200
         #last_response.body.should eq "html"
       end
@@ -218,11 +207,31 @@ describe 'router.rb' do
   end
 
   describe "GETS sources/IDENTIFIER/events" do
+    let(:payload) do
+      payload = %Q{
+        {"url":"http://jumpstartlab.com/blog",
+          "requestedAt":"2013-02-16 21:38:28 -0700",
+          "respondedIn":37,
+          "referredBy":"http://jumpstartlab.com",
+          "requestType":"GET",
+          "parameters":[],
+          "eventName": "socialLogin",
+          "userAgent":"Mozilla/5.0 (Macintosh%3B Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
+          "resolutionWidth":"1920",
+          "resolutionHeight":"1280",
+          "ip":"63.29.38.211"}
+      }
+      payload.gsub("\n", "").gsub(/\s\s+/, "")
+    end
+
     context "if event already exists" do
       it "returns a page with event details" do
         pending
-        get "sources/zappos/events"
+        post "/sources", :identifier => "jumpstartlab", :rootUrl => 'http://jumpstartlab.com'
+        post "/sources/jumpstartlab/data", payload
+        get "/sources/jumpstartlab/events"
         last_response.status.should eq 200
+        last_response.body.should eq "{\"message\":\"No sadfsdevents for identifier\"}"
       end
     end
 
@@ -282,7 +291,6 @@ describe 'router.rb' do
 
     context "if POST request is good" do
       it "should return a status 200" do
-        pending
         post "/sources", :identifier => "pixar", :rootUrl => 'http://pixar.com'
         post "/sources/pixar/campaigns", :campaignName => "wall-e", :eventNames => ["recycle", "eve"]
         last_response.status.should eq 200

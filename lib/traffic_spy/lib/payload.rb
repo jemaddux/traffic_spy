@@ -10,12 +10,11 @@ module TrafficSpy
     end
 
     def self.add_to_database(params)
-       #identifier_key = Identifier.find_id()
        database.insert(:url => params[:url],
                       :requestedAt => params[:requestedAt],
-                      :relative_path => convert_url_to_relative_path(params[:splat][0],params[:url]),
+                      :relative_path => convert_url_to_relative_path(params[:identifier],params[:url]),
                       :hour => params[:requestedAt][11..12],
-                      :identifier_key => params[:splat][0],
+                      :identifier_key => params[:identifier],
                       :respondedIn => params[:respondedIn],
                       :referredBy => params[:referredBy],
                       :requestType => params[:requestType],
@@ -68,12 +67,15 @@ module TrafficSpy
       database.where(:identifier_key => identifier).select(:eventName)
     end
       
-    def self.url_exist?(params)
-      database.where(:identifier_key => params[0], :relative_path => "/#{params[1]}").count > 0
+    def self.url_exist(identifier,path)
+      root_path = Identifier.find_root_path(identifier).to_a[0][:rootUrl]
+      database.where(:url => "#{root_path}/#{path}").to_a.count > 0
+
     end
 
-    def self.sorted_url_response_times(params)
-      database.where(:identifier_key => params[0], :relative_path => "/#{params[1]}").select(:respondedIn)
+    def self.urls(identifier,path)
+      root_path = Identifier.find_root_path(identifier).to_a[0][:rootUrl]
+      database.where(:url => "#{root_path}/#{path}")
     end
 
     def self.event_exist?(identifier)
@@ -103,7 +105,7 @@ module TrafficSpy
 
     def self.specific_events(identifier, eventName)
       dataset = database.where(:eventName => eventName, :identifier_key => identifier)
-      temp_data = dataset.group_by(:hour)
+      temp_data = dataset#.group_by(:hour)
       hours = []
       temp_hash = Hash.new
       temp_data.each do |requestedAt|

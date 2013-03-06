@@ -4,8 +4,10 @@
 </head>
 <body>
   <h1>Stats page for an event</h1>
+    <ul>
     <% @events.each do |event| %>
-      <%= "#{event[:hour]} o'clock had #{event[:count]} hits." %>
+      <li><%= "#{event[:hour]} o'clock had #{event[:count]} hits." %></li>
     <% end %>
+  </ul>
 </body>
 </html>

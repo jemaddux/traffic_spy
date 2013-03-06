@@ -8,8 +8,8 @@
 
 <h2>Longest response time to shortest response time.</h2>
   <ul>
-    <% @sorted_response_times.each do |time| %>
-      <li><%= "#{time[:respondedIn]} milliseconds." %></li>
+    <% @urls.each do |url| %>
+      <li><%= "#{url.to_s}" %></li>
     <% end %>
   </ul>
 

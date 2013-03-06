@@ -4,6 +4,10 @@ module TrafficSpy
        database.insert(:identifier => params[:identifier], :rootUrl => params[:rootUrl], :created_at => Time.now, :updated_at => Time.now)
     end
 
+    def self.find_root_path(identifier)
+      database.where(:identifier => identifier)
+    end
+
     def self.already_exist?(input)
       database.where(:identifier => input).count > 0
     end
