@@ -1,6 +1,8 @@
 require 'traffic_spy'
 require 'rspec'
 require 'rack/test'
+require 'simplecov'
+SimpleCov.start
 
 
 # set :environment, :test

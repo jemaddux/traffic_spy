@@ -4,6 +4,8 @@ require './lib/traffic_spy/router'
 require './lib/traffic_spy'
 require './lib/traffic_spy/lib/database_connection'
 require './lib/traffic_spy/lib/payload'
+require 'simplecov'
+SimpleCov.start
 
 describe 'router.rb' do
   include Rack::Test::Methods
@@ -191,8 +193,7 @@ describe 'router.rb' do
     context 'if URL for IDENTITFIER exists' do
       it "should return a page with response times" do
         pending
-
-        payload_bing1 = {
+        payload = {
           :url => "http://www.bing.com/searching_for_stuff",
           :requestedAt => "2013-02-16 22:38:28 -0700",
           :respondedIn => 90,
@@ -206,23 +207,8 @@ describe 'router.rb' do
           :ip => "63.29.38.211" 
         }
 
-        payload_bing2 = {
-          :url => "http://www.bing.com/searching_for_stuff",
-          :requestedAt => "2013-03-16 22:38:28 -0700",
-          :respondedIn => 37,
-          :referredBy => "http://www.bing.com",
-          :requestType => "GET",
-          :parameters => [],
-          :eventName => "frontPage",
-          :userAgent => "Opera/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1309.0 Safari/537.17",
-          :resolutionWidth => "1920",
-          :resolutionHeight => "1080",
-          :ip => "63.39.38.213" 
-        }
-
         post "/sources", :identifier => "bing", :rootUrl => 'http://www.bing.com'
-        post "/sources/bing/data", payload_bing1
-        post "/sources/bing/data", payload_bing2
+        post "/sources/bing/data", payload
         get "sources/bing/urls/searching_for_stuff"
         last_response.status.should eq 200
         #last_response.body.should eq "html"
