@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Bundler.require
 require 'simplecov'
 SimpleCov.start
@@ -8,7 +7,6 @@ require 'rack/test'
 
 
 TrafficSpy::DatabaseConnection.database_for(:test)
-=======
 ENV["TRAFFIC_SPY_ENV"] ||= "test"
 require 'traffic_spy'
 
@@ -29,4 +27,4 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = 'random'
 end
->>>>>>> 76e73cde42f93a2bc8727d76dd6f488a0d7c9f41
+
