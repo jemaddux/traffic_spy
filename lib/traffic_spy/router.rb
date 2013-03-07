@@ -4,7 +4,7 @@ module TrafficSpy
   class Router < Sinatra::Base
     set :views, "lib/traffic_spy/views"
 
-    get '/' do 
+    get '/' do
       "Hello World"
     end
 
@@ -17,12 +17,12 @@ module TrafficSpy
         "{\"message\":\"no identifier provided\"}"
       else
         if Identifier.already_exist?(params[:identifier])
-          status 403        
+          status 403
           "{\"message\":\"Duplicate identifier.\"}"
         else
           Identifier.add_to_database(params)
           status 200
-          "{\"identifier\":\"#{params[:identifier]}\"}" 
+          "{\"identifier\":\"#{params[:identifier]}\"}"
         end
       end
     end
@@ -46,7 +46,7 @@ module TrafficSpy
 
     get "/sources/:identifier" do
       if Identifier.not_exist?(params[:identifier])
-        redirect to("/error") 
+        redirect to("/error")
       else
         @urls = Payload.popular_urls_sorted(params[:identifier]).to_a.uniq{|url| url[:url]}
         @urls.each do |url|
@@ -64,7 +64,7 @@ module TrafficSpy
           brw[:count] = Payload.how_many_browser_visits(brw)
         end
         @screen_resolutions = Payload.screen_resolution(params[:identifier]).to_a.uniq{|screen| screen[:resolutionWidth]}
-        
+
         @events = Payload.events(params[:identifier]).to_a.uniq{|event| event[:eventName]}
         @params = params
         erb :identifier_stats_page
@@ -152,6 +152,6 @@ module TrafficSpy
       erb :identifier_error
     end
 
-    
+
   end
 end

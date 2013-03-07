@@ -10,9 +10,14 @@ require "sql"
 
 
 
+require 'sequel'
+
+require 'traffic_spy/models/base'
+require 'traffic_spy/server'
+
+require "traffic_spy/version"
+
+
 module TrafficSpy
 
-  #DB = DatabaseConnection.get_connection
-                    
-                    
 end

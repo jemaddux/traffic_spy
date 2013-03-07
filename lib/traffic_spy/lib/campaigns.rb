@@ -15,13 +15,13 @@ module TrafficSpy
 
     def self.list(identifier)
       database.where(:identifier => identifier)
-    end    
+    end
 
     def self.exist?(params)
       database.where(:campaignName => params[:campaignName]).count > 0
     end
 
-    
+
 
     def self.does_exist?(identifier)
       database.where(:identifier => identifier).count > 0

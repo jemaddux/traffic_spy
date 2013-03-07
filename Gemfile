@@ -10,9 +10,10 @@ gem "agent_orange"
 gem 'sql'
 
 # Specify your gem's dependencies in traffic_spy.gemspec
-gemspec
+#gemspec
 
 group :development do
+  gem 'shotgun'
   gem 'rspec'
   gem 'simplecov', :require => false, :group => :test
   gem 'guard-rspec'
@@ -23,8 +24,12 @@ group :development do
   gem 'rb-fsevent', '~> 0.9'
   gem 'capybara'
   gem 'sqlite3'
+  gem 'rb-fsevent', '~> 0.9'
 end
 
 group :evaluations do
   # THIS SPACE RESERVED FOR EVALUATIONS
+  gem 'cane'
+  gem 'reek'
+  gem 'rake'
 end

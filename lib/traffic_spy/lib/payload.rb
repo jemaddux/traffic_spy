@@ -74,7 +74,7 @@ module TrafficSpy
     end
 
     def self.already_exist?(params)
-      database.where(:url => params[:url], 
+      database.where(:url => params[:url],
                               :requestedAt => params[:requestedAt]).count > 0
     end
 
@@ -89,7 +89,7 @@ module TrafficSpy
     def self.oses(identifier)
       database.where(:identifier_key => identifier).select(:userAgent)##################
     end
-      
+
     def self.screen_resolution(identifier)
       database.where(:identifier_key => identifier).select(:resolutionHeight, :resolutionWidth)
     end
@@ -97,11 +97,11 @@ module TrafficSpy
     def self.response_times(identifier)
       database.where(:identifier_key => identifier).select(:respondedIn)
     end
-      
+
     def self.events(identifier)
       database.where(:identifier_key => identifier).select(:eventName)
     end
-      
+
     def self.url_exist(identifier,path)
       if Identifier.not_exist?(identifier)
         return false
@@ -117,7 +117,7 @@ module TrafficSpy
     end
 
     def self.event_exist?(identifier)
-      database.where(:identifier_key => identifier).count > 0 
+      database.where(:identifier_key => identifier).count > 0
     end
 
     def self.how_many_events?(identifier,eventName)
