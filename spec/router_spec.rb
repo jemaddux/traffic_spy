@@ -1,3 +1,5 @@
+require 'simplecov'
+SimpleCov.start
 require 'spec_helper'
 
 describe 'router.rb' do
