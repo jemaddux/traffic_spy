@@ -1,18 +1,48 @@
 <!DOCTYPE HTML>
 <HTML>
 <HEAD><TITLE>URL Statistics</TITLE>
+  <style>
+  #main{
+  }
+  #sidebar{
+    background-color: lightblue;
+    width: 10%;
+    float: left;
+    padding: 20px;
+    border-radius: 15px;
+  }
+  #info{
+    background-color: lightgreen;
+    width: 80%;
+    float: right;
+    padding: 20px;
+    border-radius: 15px;
+  }
+</style>
 </HEAD>
 <BODY>
+<div id="main">
+<div id='sidebar'>
+  <h2><%= params[:identifier] %></h2>
+
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>">Home</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/events">Events</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/campaigns">Campaigns</a><br>
+
+</div>
+<div id='info'>
 
 <h1>URL Statistics</h1>
 
 <h2>Longest response time to shortest response time.</h2>
   <ul>
     <% @urls.each do |url| %>
-      <li><%= "#{url.to_s}" %></li>
+      <li><%= "#{url[:respondedIn]} milliseconds" %></li>
     <% end %>
   </ul>
 
+</div>
+</div>
 </BODY>
 </HTML>
 

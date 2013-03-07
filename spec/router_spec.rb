@@ -171,10 +171,10 @@ describe 'router.rb' do
   describe "GET sources/IDENTIFIER/urls/RELATIVE/PATH" do
     let(:payload) do
       payload = %Q{
-        {"url":"http://jumpstartlab.com/blog",
+        {"url":"http://jumphoplab.com/blog",
           "requestedAt":"2013-02-16 21:38:28 -0700",
           "respondedIn":37,
-          "referredBy":"http://jumpstartlab.com",
+          "referredBy":"http://jumphoplab.com",
           "requestType":"GET",
           "parameters":[],
           "eventName": "socialLogin",
@@ -184,17 +184,6 @@ describe 'router.rb' do
           "ip":"63.29.38.211"}
       }
       payload.gsub("\n", "").gsub(/\s\s+/, "")
-    end
-
-    context 'if URL for IDENTITFIER exists' do
-      it "should return a page with response times" do
-        pending
-        post "/sources", :identifier => "jumpstartlab", :rootUrl => 'http://jumpstartlab.com'
-        post "/sources/jumpstartlab/data", payload
-        get "sources/jumpstartlab/urls/blog"
-        last_response.status.should eq 200
-        #last_response.body.should eq "html"
-      end
     end
 
     context "if URL for IDENTITFIER doesn't exist" do
@@ -222,17 +211,6 @@ describe 'router.rb' do
           "ip":"63.29.38.211"}
       }
       payload.gsub("\n", "").gsub(/\s\s+/, "")
-    end
-
-    context "if event already exists" do
-      it "returns a page with event details" do
-        pending
-        post "/sources", :identifier => "jumpstartlab", :rootUrl => 'http://jumpstartlab.com'
-        post "/sources/jumpstartlab/data", payload
-        get "/sources/jumpstartlab/events"
-        last_response.status.should eq 200
-        last_response.body.should eq "{\"message\":\"No sadfsdevents for identifier\"}"
-      end
     end
 
     context "if event doesnt exist" do

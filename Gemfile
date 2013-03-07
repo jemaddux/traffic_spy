@@ -7,6 +7,7 @@ gem 'sequel'
 gem 'json'
 gem 'pg'
 gem "agent_orange"
+gem 'sql'
 
 # Specify your gem's dependencies in traffic_spy.gemspec
 gemspec

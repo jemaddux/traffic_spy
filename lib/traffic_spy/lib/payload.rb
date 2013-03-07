@@ -12,7 +12,7 @@ module TrafficSpy
     def self.add_to_database(params)
        database.insert(:url => params[:url],
                       :requestedAt => params[:requestedAt],
-                      :relative_path => convert_url_to_relative_path(params[:identifier],params[:url]),
+                      :relative_path => convert_url_to_relative_path(params[:identifier],params[:url],params[:referredBy]),
                       :hour => params[:requestedAt][11..12],
                       :identifier_key => params[:identifier],
                       :respondedIn => params[:respondedIn],
@@ -28,14 +28,49 @@ module TrafficSpy
                       :updated_at => Time.now)
     end
 
+    def self.how_many_event_names(event_name)
+      database.where(:eventName => event_name[:eventName]).count.to_i
+    end
 
+    def self.urls_times(url)
+      temp = database.where(:url => url[:url]).select(:respondedIn)
+      times = []
+      temp.each do |tem|
+        times << tem[:respondedIn].to_i
+      end
+      times.sort
+    end
+
+    def self.url_time_long(url)
+      urls_times(url).last
+    end
+
+    def self.url_time_short(url)
+      urls_times(url).first
+    end
+
+    def self.url_time_avg(url)
+      sum = 0
+      urls_times(url).each do |time|
+        sum += time.to_i
+      end
+      sum / urls_times(url).count
+    end
+
+    def self.how_many_browser_visits(brw)
+      database.where(:userAgent => brw[:userAgent]).count
+    end
+
+    def self.how_many_urls(url)
+      database.where(:url => url[:url]).count
+    end
 
     def self.get_events(identifier_key,eventName)
       database.where(:eventName => eventName, :identifier_key => identifier_key)
     end
 
-    def self.convert_url_to_relative_path(identifier_key,url)
-      url.gsub("http://www.","").gsub("http://","").gsub(".com","").gsub(".net","").gsub(".it","").gsub(identifier_key,"")
+    def self.convert_url_to_relative_path(identifier_key,url,referredBy)
+      url.gsub(referredBy,"").gsub("http://www.","").gsub("http://","").gsub(".com","").gsub(".net","").gsub(".it","").gsub(identifier_key,"")
     end
 
     def self.already_exist?(params)
@@ -44,7 +79,7 @@ module TrafficSpy
     end
 
     def self.popular_urls_sorted(identifier)
-      database.where(:identifier_key => identifier).select(:url)
+      database.where(:identifier_key => identifier)
     end
 
     def self.browsers(identifier)
@@ -68,9 +103,12 @@ module TrafficSpy
     end
       
     def self.url_exist(identifier,path)
-      root_path = Identifier.find_root_path(identifier).to_a[0][:rootUrl]
-      database.where(:url => "#{root_path}/#{path}").to_a.count > 0
-
+      if Identifier.not_exist?(identifier)
+        return false
+      else
+        root_path = Identifier.find_root_path(identifier).to_a[0][:rootUrl]
+        database.where(:url => "#{root_path}/#{path}").to_a.count > 0
+      end
     end
 
     def self.urls(identifier,path)

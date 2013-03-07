@@ -1,29 +1,60 @@
 <!DOCTYPE HTML>
 <HTML>
-<HEAD><TITLE>Stats Page</TITLE>
+<HEAD><TITLE><%= params[:identifier] %> Stats Page</TITLE>
+<style>
+  #main{
+  }
+  #sidebar{
+    background-color: lightblue;
+    width: 10%;
+    float: left;
+    padding: 20px;
+    border-radius: 15px;
+  }
+  #info{
+    background-color: lightgreen;
+    width: 80%;
+    float: right;
+    padding: 20px;
+    border-radius: 15px;
+  }
+</style>
 </HEAD>
 <BODY>
+
+<div id="main">
+<div id='sidebar'>
+  <h2><%= params[:identifier] %></h2>
+
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>">Home</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/events">Events</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/campaigns">Campaigns</a><br>
+
+</div>
+<div id='info'>
+
 
 <h1>Page full of stats</h1>
 
 <h2>Most requested URLS to least requested URLS</h2>
   <ul>
     <% @urls.each do |url| %>
-      <li><a href="google.com"><%= url[:url] %></a></li>
+      <li><a href="http://localhost:9393/sources/<%= params[:identifier] %>/urls<%= url[:relative_path].gsub(params[:identifier].to_s.downcase,"") %>"><%= url[:url] %></a>
+        <%= " was requested #{url[:count]} times with response times: Avg #{url[:avg]} Longest #{url[:longest]} Shortest #{url[:shortest]}."%></li>
     <% end %>
   </ul>
 
 <h2>Web browser breakdown across all requests (userAgent)</h2>
   <ul>
     <% @browsers.each do |browser| %>
-      <li><%= browser[:userAgent].split[11] %></li>
+      <li><%= "#{browser[:browser]} visted #{browser[:count]} times." %></li>
     <% end %>
   </ul>
 
 <h2>OS breakdown across all requests (userAgent)</h2>
   <ul>
-    <% @oses.each do |os| %>
-      <li><%= os[:userAgent].split[3..6].join(" ")[0..-2] %></li>
+    <% @browsers.each do |os| %>
+      <li><%= "#{os[:os]} visted #{os[:count]} times."  %></li>
     <% end %>
   </ul>
 
@@ -34,12 +65,7 @@
     <% end %>
   </ul>
 
-<h2>Longest, average response time per URL to shortest, average response time per URL</h2>
-  <ul>
-    <% @average_response_times.each do |time| %>
-      <li><%= time[:respondedIn] %></li>
-    <% end %>
-  </ul>
+
 
 <h2>Hyperlink to view aggregate event data</h2>
   <ul>
@@ -48,7 +74,8 @@
     <% end %>
   </ul>
 
-
+</div>
+</div>
 </BODY>
 </HTML>
 

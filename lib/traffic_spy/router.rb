@@ -48,12 +48,24 @@ module TrafficSpy
       if Identifier.not_exist?(params[:identifier])
         redirect to("/error") 
       else
-        @urls = Payload.popular_urls_sorted(params[:identifier]).to_a
-        @browsers = Payload.browsers(params[:identifier])
-        @oses = Payload.oses(params[:identifier])
-        @screen_resolutions = Payload.screen_resolution(params[:identifier])
-        @average_response_times = Payload.response_times(params[:identifier])
-        @events = Payload.events(params[:identifier])
+        @urls = Payload.popular_urls_sorted(params[:identifier]).to_a.uniq{|url| url[:url]}
+        @urls.each do |url|
+          url[:count] = Payload.how_many_urls(url)
+          url[:longest] = Payload.url_time_long(url)
+          url[:shortest] = Payload.url_time_short(url)
+          url[:avg] = Payload.url_time_avg(url)
+        end
+        @urls = @urls.sort_by{|url| url[:count]}.reverse
+        @browsers = Payload.browsers(params[:identifier]).to_a.uniq{|brw| brw[:userAgent]}
+        @browsers.each do |brw|
+          ua = AgentOrange::UserAgent.new(brw[:userAgent])
+          brw[:browser] = ua.device.engine.browser
+          brw[:os] = ua.device.operating_system
+          brw[:count] = Payload.how_many_browser_visits(brw)
+        end
+        @screen_resolutions = Payload.screen_resolution(params[:identifier]).to_a.uniq{|screen| screen[:resolutionWidth]}
+        
+        @events = Payload.events(params[:identifier]).to_a.uniq{|event| event[:eventName]}
         @params = params
         erb :identifier_stats_page
       end
@@ -62,7 +74,8 @@ module TrafficSpy
 
     get "/sources/:identifier/urls/:path" do
       if Payload.url_exist(params[:identifier],params[:path])
-        @urls = Payload.urls(params[:identifier],params[:path])
+        @urls = Payload.urls(params[:identifier],params[:path]).to_a.sort_by{|url| url[:respondedIn].to_i}.reverse
+        status 200
         erb :url_statistics
       else
         status 400
@@ -72,7 +85,8 @@ module TrafficSpy
 
     get "/sources/:identifier/events" do
      if Payload.event_exist?(params[:identifier])
-        @events = Payload.sorted_grouped_events(params[:identifier])
+        @params = params
+        @events = Payload.sorted_grouped_events(params[:identifier]).to_a.uniq{|event| event[:eventName]}.sort_by{|event| event[:count]}.reverse
         erb :events
       else
         status 400
@@ -82,7 +96,7 @@ module TrafficSpy
 
     get "/sources/:identifier/events/:eventName" do
       if Payload.specific_event_exist?(params[:identifier],params[:eventName])
-        @events = Payload.specific_events(params[:identifier],params[:eventName])
+        @events = Payload.specific_events(params[:identifier],params[:eventName]).to_a.uniq{|event| event[:hour]}.sort_by{|event| event[:hour]}
         erb :event_stats
       else
         erb :event_redirect
@@ -106,6 +120,7 @@ module TrafficSpy
     get "/sources/:identifier/campaigns" do
       if Campaigns.does_exist?(params[:identifier])
         status 200
+        @params = params
         @campaigns = Campaigns.list(params[:identifier])
         erb :campaign_index
       else
@@ -116,10 +131,9 @@ module TrafficSpy
 
     get "/sources/:identifier/campaigns/:campaignName" do
       if Campaigns.campaignName_exist?(params)
-        @eventNames = EventNames.list(params)
-        @payloads = []
-        @eventNames.each do |eventName|
-          @payloads += Payload.get_events(params[:identifier],eventName[:eventName]).to_a
+        @eventNames = EventNames.list(params).to_a
+        @eventNames.each do |event|
+          event[:count] = Payload.how_many_event_names(event)
         end
         @params = params
         erb :campaignName

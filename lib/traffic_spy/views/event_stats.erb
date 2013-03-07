@@ -1,13 +1,45 @@
 <!DOCTYPE HTML>
 <html>
 <head><title>Stats page for an event</title>
+  <style>
+  #main{
+  }
+  #sidebar{
+    background-color: lightblue;
+    width: 10%;
+    float: left;
+    padding: 20px;
+    border-radius: 15px;
+  }
+  #info{
+    background-color: lightgreen;
+    width: 80%;
+    float: right;
+    padding: 20px;
+    border-radius: 15px;
+  }
+</style>
 </head>
 <body>
+<div id="main">
+<div id='sidebar'>
+  <h2><%= params[:identifier] %></h2>
+
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>">Home</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/events">Events</a><br>
+  <a href="http://localhost:9393/sources/<%= params[:identifier] %>/campaigns">Campaigns</a><br>
+
+</div>
+<div id='info'>
+
   <h1>Stats page for an event</h1>
     <ul>
     <% @events.each do |event| %>
       <li><%= "#{event[:hour]} o'clock had #{event[:count]} hits." %></li>
     <% end %>
   </ul>
+
+ </div>
+</div> 
 </body>
 </html>
